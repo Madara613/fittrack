@@ -21,12 +21,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Spring Security configuration configuring stateless JWT-based authentication,
+ * CORS policies, route authorization rules, and password hashing mechanisms.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -37,6 +42,9 @@ public class SecurityConfig {
     @Value("${cors.allowed-origins:${ALLOWED_ORIGINS:http://localhost:5173}}")
     private String allowedOrigins;
 
+    /**
+     * Helper parsing configured comma-separated origins into a string list.
+     */
     private List<String> getAllowedOriginsList() {
         if (allowedOrigins == null || allowedOrigins.isBlank()) {
             return List.of("http://localhost:5173");
@@ -47,6 +55,14 @@ public class SecurityConfig {
                 .toList();
     }
 
+    /**
+     * Configures HTTP security filter chain: stateless session management,
+     * permit-all public routes (/auth/**, /api/health), and JWT filter integration.
+     *
+     * @param http HttpSecurity instance
+     * @return constructed SecurityFilterChain
+     * @throws Exception in case of configuration errors
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -68,16 +84,33 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Password encoder bean utilizing BCrypt hashing algorithm.
+     *
+     * @return BCryptPasswordEncoder instance
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Exposes the AuthenticationManager bean from authentication configuration.
+     *
+     * @param configuration authentication configuration
+     * @return AuthenticationManager instance
+     * @throws Exception in case of retrieval failure
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    /**
+     * Configures Spring Security CORS source permitting configured origins and standard headers.
+     *
+     * @return CorsConfigurationSource bean
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -94,11 +127,16 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Configures Spring Web MVC CORS registry matching security origins.
+     *
+     * @return WebMvcConfigurer bean
+     */
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
                 List<String> origins = getAllowedOriginsList();
                 registry.addMapping("/**")
                     .allowedOrigins(origins.toArray(new String[0]))

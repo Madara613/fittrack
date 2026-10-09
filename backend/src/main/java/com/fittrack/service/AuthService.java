@@ -5,11 +5,12 @@ import com.fittrack.dto.LoginRequest;
 import com.fittrack.dto.SignupRequest;
 import com.fittrack.entity.Profile;
 import com.fittrack.entity.User;
+import com.fittrack.exception.BadRequestException;
+import com.fittrack.exception.ResourceNotFoundException;
 import com.fittrack.repository.ProfileRepository;
 import com.fittrack.repository.UserRepository;
 import com.fittrack.security.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,11 +18,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Service managing user authentication, registration, and JWT token issuance.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -33,10 +36,18 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Registers a new user, automatically initializes their blank fitness profile,
+     * and generates an initial JWT token.
+     *
+     * @param request the registration details including name, email, and raw password
+     * @return {@link AuthResponse} containing the issued JWT token and basic user details
+     * @throws BadRequestException if the provided email is already registered
+     */
     @Transactional
     public AuthResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already registered");
+            throw new BadRequestException("Email is already registered");
         }
 
         User user = User.builder()
@@ -47,7 +58,7 @@ public class AuthService {
 
         user = userRepository.save(user);
 
-        // Initialize empty profile for user
+        // Initialize empty profile for newly registered user
         Profile profile = Profile.builder()
                 .user(user)
                 .build();
@@ -69,15 +80,23 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Authenticates existing user credentials and produces a valid JWT token.
+     *
+     * @param request the login request containing email and raw password
+     * @return {@link AuthResponse} containing the JWT token and user details
+     * @throws ResourceNotFoundException if the user cannot be located after authentication
+     */
     public AuthResponse login(LoginRequest request) {
         String email = request.getEmail().toLowerCase().trim();
 
+        // Delegate authentication to Spring Security's AuthenticationManager
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, request.getPassword())
         );
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         Map<String, Object> extraClaims = new HashMap<>();
