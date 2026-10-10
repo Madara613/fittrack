@@ -33,12 +33,15 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleResourceNotFoundException(ex, request);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(404, response.getBody().getStatus());
-        assertEquals("Not Found", response.getBody().getError());
-        assertEquals("Workout not found with id: 123", response.getBody().getMessage());
-        assertEquals("/api/test", response.getBody().getPath());
-        assertNotNull(response.getBody().getTimestamp());
+        ErrorResponse body = response.getBody();
+        assertNotNull(body);
+        if (body != null) {
+            assertEquals(404, body.getStatus());
+            assertEquals("Not Found", body.getError());
+            assertEquals("Workout not found with id: 123", body.getMessage());
+            assertEquals("/api/test", body.getPath());
+            assertNotNull(body.getTimestamp());
+        }
     }
 
     @Test
@@ -47,11 +50,14 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleBadRequestException(ex, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(400, response.getBody().getStatus());
-        assertEquals("Bad Request", response.getBody().getError());
-        assertEquals("Workout type is required", response.getBody().getMessage());
-        assertEquals("/api/test", response.getBody().getPath());
+        ErrorResponse body = response.getBody();
+        assertNotNull(body);
+        if (body != null) {
+            assertEquals(400, body.getStatus());
+            assertEquals("Bad Request", body.getError());
+            assertEquals("Workout type is required", body.getMessage());
+            assertEquals("/api/test", body.getPath());
+        }
     }
 
     @Test
@@ -60,10 +66,13 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleUnauthorizedException(ex, request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(401, response.getBody().getStatus());
-        assertEquals("Unauthorized", response.getBody().getError());
-        assertEquals("User is not authenticated", response.getBody().getMessage());
+        ErrorResponse body = response.getBody();
+        assertNotNull(body);
+        if (body != null) {
+            assertEquals(401, body.getStatus());
+            assertEquals("Unauthorized", body.getError());
+            assertEquals("User is not authenticated", body.getMessage());
+        }
     }
 
     @Test
@@ -72,10 +81,13 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleForbiddenException(ex, request);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(403, response.getBody().getStatus());
-        assertEquals("Forbidden", response.getBody().getError());
-        assertEquals("You are not authorized to modify this workout", response.getBody().getMessage());
+        ErrorResponse body = response.getBody();
+        assertNotNull(body);
+        if (body != null) {
+            assertEquals(403, body.getStatus());
+            assertEquals("Forbidden", body.getError());
+            assertEquals("You are not authorized to modify this workout", body.getMessage());
+        }
     }
 
     @Test
@@ -84,9 +96,12 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleResponseStatusException(ex, request);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(409, response.getBody().getStatus());
-        assertEquals("Already exists", response.getBody().getMessage());
+        ErrorResponse body = response.getBody();
+        assertNotNull(body);
+        if (body != null) {
+            assertEquals(409, body.getStatus());
+            assertEquals("Already exists", body.getMessage());
+        }
     }
 
     @Test
@@ -95,9 +110,12 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleBadCredentialsException(ex, request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(401, response.getBody().getStatus());
-        assertEquals("Invalid email or password", response.getBody().getMessage());
+        ErrorResponse body = response.getBody();
+        assertNotNull(body);
+        if (body != null) {
+            assertEquals(401, body.getStatus());
+            assertEquals("Invalid email or password", body.getMessage());
+        }
     }
 
     @Test
@@ -106,9 +124,12 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleAccessDeniedException(ex, request);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(403, response.getBody().getStatus());
-        assertEquals("Access denied", response.getBody().getMessage());
+        ErrorResponse body = response.getBody();
+        assertNotNull(body);
+        if (body != null) {
+            assertEquals(403, body.getStatus());
+            assertEquals("Access denied", body.getMessage());
+        }
     }
 
     @Test
@@ -117,8 +138,11 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = exceptionHandler.handleGenericException(ex, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(500, response.getBody().getStatus());
-        assertTrue(response.getBody().getMessage().contains("Unexpected error"));
+        ErrorResponse body = response.getBody();
+        assertNotNull(body);
+        if (body != null) {
+            assertEquals(500, body.getStatus());
+            assertTrue(body.getMessage().contains("Unexpected error"));
+        }
     }
 }

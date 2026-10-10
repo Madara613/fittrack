@@ -3,8 +3,6 @@ package com.fittrack;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fittrack.dto.SignupRequest;
 import com.fittrack.dto.WorkoutRequest;
-import com.fittrack.entity.User;
-import com.fittrack.entity.Workout;
 import com.fittrack.repository.ProfileRepository;
 import com.fittrack.repository.UserRepository;
 import com.fittrack.repository.WorkoutRepository;

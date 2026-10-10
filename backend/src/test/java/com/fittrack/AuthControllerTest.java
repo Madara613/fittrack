@@ -11,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,6 +18,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Integration tests for authentication endpoints and security checks.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 class AuthControllerTest {
@@ -58,13 +60,12 @@ class AuthControllerTest {
                 .password("password123")
                 .build();
 
-        MvcResult signupResult = mockMvc.perform(post("/auth/signup")
+        mockMvc.perform(post("/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signupRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token", notNullValue()))
-                .andExpect(jsonPath("$.email").value("test@example.com"))
-                .andReturn();
+                .andExpect(jsonPath("$.email").value("test@example.com"));
 
         // 2. Login
         LoginRequest loginRequest = LoginRequest.builder()
@@ -72,12 +73,11 @@ class AuthControllerTest {
                 .password("password123")
                 .build();
 
-        MvcResult loginResult = mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token", notNullValue()))
-                .andReturn();
+                .andExpect(jsonPath("$.token", notNullValue()));
 
         // 3. Login with wrong password should fail
         LoginRequest badLogin = LoginRequest.builder()
